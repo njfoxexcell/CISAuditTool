@@ -1,0 +1,8 @@
+bin/
+obj/
+publish/
+.vs/
+*.user
+*.suo
+extracted/benchmark.txt
+extracted/benchmark.utf8.txt
