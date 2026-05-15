@@ -21,6 +21,23 @@ Set-Location $root
 function Step([string]$msg) { Write-Host ('==> ' + $msg) -ForegroundColor Cyan }
 function BT { '`' }   # one literal backtick — used inside markdown code spans
 
+# Wrap git so its harmless stderr (CRLF warnings, "main is up-to-date", etc.)
+# does not trip the strict error preference. Throws only if exit code is nonzero.
+function Invoke-Git {
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $out = & git @args 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            throw ('git ' + ($args -join ' ') + ' failed (exit ' + $LASTEXITCODE + '): ' + ($out -join "`n"))
+        }
+        $out | Where-Object { $_ -notmatch '^warning:' } | ForEach-Object { Write-Host $_ }
+        return ($out | Where-Object { $_ -notmatch '^warning:' })
+    } finally {
+        $ErrorActionPreference = $prev
+    }
+}
+
 Step ('dotnet build (' + $Configuration + ')')
 dotnet build -c $Configuration -nologo -v minimal
 if ($LASTEXITCODE -ne 0) { throw ('Build failed (exit ' + $LASTEXITCODE + ')') }
@@ -50,7 +67,8 @@ $rows | Format-Table -AutoSize | Out-String | Write-Host
 
 $gitSha    = (& git rev-parse HEAD 2>$null)
 $gitBranch = (& git rev-parse --abbrev-ref HEAD 2>$null)
-$gitDirty  = if ((& git status --porcelain 2>$null)) { 'dirty (uncommitted edits in tree)' } else { 'clean' }
+$porc      = (& git status --porcelain 2>$null)
+$gitDirty  = if ($porc) { 'dirty (uncommitted edits in tree)' } else { 'clean' }
 $buildTime = (Get-Date).ToString('yyyy-MM-dd HH:mm:ss zzz')
 
 Step 'Writing BUILD_HASHES.md'
@@ -116,13 +134,13 @@ if ($NoCommit) {
 }
 
 Step 'git add + commit'
-& git add BUILD_HASHES.md | Out-Null
-$staged = & git diff --cached --name-only
+Invoke-Git add 'BUILD_HASHES.md' | Out-Null
+$staged = Invoke-Git diff --cached --name-only
 if (-not $staged) {
     Write-Host 'BUILD_HASHES.md unchanged — nothing to commit.'
     if (-not $NoPush) {
         Step 'git push'
-        & git push origin HEAD
+        Invoke-Git push origin HEAD
     }
     return
 }
@@ -130,18 +148,15 @@ if (-not $staged) {
 $primaryHash = ($rows | Where-Object { $_.Path -like '*CISAuditTool.exe' } | Select-Object -ExpandProperty SHA256 -First 1)
 if (-not $primaryHash) { $primaryHash = '(no exe in publish output)' }
 
-$msgLines = @(
-    'Build manifest update - ' + $buildTime,
-    '',
-    'Primary artifact CISAuditTool.exe sha256: ' + $primaryHash,
-    '',
-    'Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>'
-)
-& git commit -m ($msgLines -join $nl) | Out-Null
+# Each -m produces a separate paragraph in the commit message.
+$subject = 'Build manifest update - ' + $buildTime
+$body    = 'Primary artifact CISAuditTool.exe sha256: ' + $primaryHash
+$trailer = 'Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>'
+Invoke-Git commit -m $subject -m $body -m $trailer | Out-Null
 
 if (-not $NoPush) {
     Step 'git push'
-    & git push origin HEAD
+    Invoke-Git push origin HEAD
 }
 
 Step 'Done.'
