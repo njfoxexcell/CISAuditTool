@@ -1,0 +1,4 @@
+# Treat Claude session transcripts as binary — they're newline-delimited JSON
+# and any LF↔CRLF normalization would corrupt them.
+.claude-history/*.jsonl  binary
+core/Data/Controls.json  text eol=lf
