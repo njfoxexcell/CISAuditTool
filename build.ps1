@@ -134,10 +134,13 @@ if ($NoCommit) {
 }
 
 Step 'git add + commit'
-Invoke-Git add 'BUILD_HASHES.md' | Out-Null
+# Stage every working-tree change so the manifest commit reflects the exact
+# source that produced these hashes. Without this we'd be recording a hash
+# of binaries built from uncommitted code — useless for verification.
+Invoke-Git add -A | Out-Null
 $staged = Invoke-Git diff --cached --name-only
 if (-not $staged) {
-    Write-Host 'BUILD_HASHES.md unchanged — nothing to commit.'
+    Write-Host 'No changes to commit — working tree was already clean and the manifest is unchanged.'
     if (-not $NoPush) {
         Step 'git push'
         Invoke-Git push origin HEAD

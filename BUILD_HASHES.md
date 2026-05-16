@@ -5,6 +5,22 @@ SHA-256 of one artifact under publish/. Verify before deploying.
 
 ## Latest build
 
+- **Built:** 2026-05-15 22:16:12 -05:00
+- **Configuration:** Release
+- **Runtime:** win-x64, framework-dependent, single-file
+- **Git commit:** `a73b37a8b0cb89a65611eb306c0358373ac79c4d` (main)
+- **Working tree:** dirty (uncommitted edits in tree)
+
+| File | Size (bytes) | SHA-256 |
+| --- | ---: | --- |
+| `publish\CISAuditTool.exe` | 1996392 | `F63195BC40083D13D41114DE01DE580B6F32B901DB534B725C9A7F223A06B8A5` |
+
+## History
+
+Older builds are appended below for traceability.
+
+### Build at 2026-05-15 22:15:30 -05:00
+
 - **Built:** 2026-05-15 22:15:30 -05:00
 - **Configuration:** Release
 - **Runtime:** win-x64, framework-dependent, single-file
@@ -14,10 +30,6 @@ SHA-256 of one artifact under publish/. Verify before deploying.
 | File | Size (bytes) | SHA-256 |
 | --- | ---: | --- |
 | `publish\CISAuditTool.exe` | 1996392 | `202DEA88AEC547F9415B3E4A9047F5C838F29E213FAB97AAD8801B208C2AB86F` |
-
-## History
-
-Older builds are appended below for traceability.
 
 ### Build at 2026-05-15 15:13:49 -05:00
 

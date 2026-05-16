@@ -58,8 +58,18 @@ public partial class MainWindow : Window
         _cts = new CancellationTokenSource();
         try
         {
+            // IProgress<T> must be constructed on the UI thread so its captured
+            // SynchronizationContext marshals callbacks back to the dispatcher.
+            // If we built it inside Task.Run it would fire on the worker thread
+            // and crash when touching Progress / StatusText.
+            var progress = new Progress<ProgressUpdate>(u =>
+            {
+                Progress.Value = 100.0 * u.Completed / Math.Max(1, u.Total);
+                StatusText.Text = $"[{u.Completed}/{u.Total}] {u.CurrentControlId} — {u.Message}";
+            });
+
             var stopwatch = Stopwatch.StartNew();
-            var report = await Task.Run(() => RunScan(selectedProfiles, _cts.Token));
+            var report = await Task.Run(() => RunScan(selectedProfiles, progress, _cts.Token));
             stopwatch.Stop();
             Log($"Scan completed in {stopwatch.Elapsed.TotalSeconds:F1}s.");
             Log($"Score: {report.ScorePercent:F1}%  ({report.Passed}/{report.ScoredTotal} scored checks passed)");
@@ -112,7 +122,7 @@ public partial class MainWindow : Window
         return list;
     }
 
-    private AuditReport RunScan(List<string> selectedProfiles, CancellationToken ct)
+    private AuditReport RunScan(List<string> selectedProfiles, IProgress<ProgressUpdate> progress, CancellationToken ct)
     {
         var allControls = AuditEngine.LoadCatalogFromEmbedded();
         UiPost(() => Log($"Loaded catalog: {allControls.Count} total controls"));
@@ -121,11 +131,6 @@ public partial class MainWindow : Window
         UiPost(() => Log($"Filtered to selected profiles: {selected.Count} controls"));
 
         var engine = new AuditEngine();
-        var progress = new Progress<ProgressUpdate>(u =>
-        {
-            Progress.Value = 100.0 * u.Completed / Math.Max(1, u.Total);
-            StatusText.Text = $"[{u.Completed}/{u.Total}] {u.CurrentControlId} — {u.Message}";
-        });
         return engine.Run(selected, progress, ct);
     }
 
