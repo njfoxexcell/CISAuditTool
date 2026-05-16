@@ -15,6 +15,20 @@ public sealed class AuditPolCheckExecutor : ICheckExecutor
 {
     public CheckKind Kind => CheckKind.AuditPolicy;
 
+    /// <summary>CIS occasionally names a subcategory differently from how
+    /// Windows reports it. Keep this list small and verified against
+    /// `auditpol /list /subcategory:*`.</summary>
+    private static readonly Dictionary<string, string> SubcategoryAliases = new(StringComparer.OrdinalIgnoreCase)
+    {
+        // CIS title (after "Audit " prefix is stripped) -> Windows subcategory
+        ["PNP Activity"]                  = "Plug and Play Events",
+        ["Plug and Play Events"]          = "Plug and Play Events",
+        ["Network Policy Server"]         = "Network Policy Server",
+        ["Token Right Adjusted"]          = "Token Right Adjusted Events",
+        ["User Device Claims"]            = "User / Device Claims",
+        ["User/Device Claims"]            = "User / Device Claims",
+    };
+
     public CheckResult Evaluate(ControlDefinition def, AuditContext ctx)
     {
         var sw = Stopwatch.StartNew();
@@ -31,7 +45,16 @@ public sealed class AuditPolCheckExecutor : ICheckExecutor
         }
         var expected = p.GetValueOrDefault("expected", "");
 
-        snap.BySubcategory.TryGetValue(subcat, out var actual);
+        // Try the raw name first; fall back to alias map.
+        if (!snap.BySubcategory.TryGetValue(subcat, out var actual))
+        {
+            if (SubcategoryAliases.TryGetValue(subcat, out var mapped) &&
+                snap.BySubcategory.TryGetValue(mapped, out var mappedActual))
+            {
+                actual = mappedActual;
+                subcat = mapped + $" (mapped from '{subcat}')";
+            }
+        }
         actual ??= "(not present)";
 
         var allowed = expected.Split('|', StringSplitOptions.RemoveEmptyEntries)

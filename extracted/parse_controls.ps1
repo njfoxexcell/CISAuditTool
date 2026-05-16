@@ -179,23 +179,31 @@ function Resolve-Check([string]$id, [string]$title, [string]$headerTail, [string
     }
 
     # 2) Account/Password/Lockout policies — section 1.x (SystemAccess via secedit)
+    # NOTE: Each branch returns early. The patterns must be specific enough that
+    # only the intended rule matches. We use ^...$ anchors so e.g.
+    # "Relax minimum password length limits" does NOT match "Minimum password length".
     if ($id -match '^1\.[12]\.') {
-        # Audit usually says "value of <X> ..." or pattern "Enforce password history is set to '24 or more password(s)'"
         $val = $null
         $titleVal = [regex]::Match($headerTail, "(?:is set to|is configured to)\s+['‘]([^'’]+)['’]")
         if ($titleVal.Success) { $val = $titleVal.Groups[1].Value }
+        # Use the exact title for matching (case-insensitive).
         switch -Regex ($title) {
-            "Enforce password history"        { $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='PasswordHistorySize'; $result.Parameters['op']='gte'; if ($val -match '(\d+)') { $result.Parameters['expected']=$Matches[1] }; $result.ExpectedDisplay=$val; return $result }
-            "Maximum password age"            { $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='MaximumPasswordAge'; $result.Parameters['op']='between'; $result.Parameters['expected']='1..60'; $result.ExpectedDisplay=$val; return $result }
-            "Minimum password age"            { $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='MinimumPasswordAge'; $result.Parameters['op']='gte'; $result.Parameters['expected']='1'; $result.ExpectedDisplay=$val; return $result }
-            "Minimum password length"         { $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='MinimumPasswordLength'; $result.Parameters['op']='gte'; if ($val -match '(\d+)') { $result.Parameters['expected']=$Matches[1] }; $result.ExpectedDisplay=$val; return $result }
-            "Password must meet complexity"   { $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='PasswordComplexity'; $result.Parameters['op']='equals'; $result.Parameters['expected']='1'; $result.ExpectedDisplay='Enabled'; return $result }
-            "Relax minimum password length"   { $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='RelaxMinimumPasswordLengthLimits'; $result.Parameters['op']='equals'; $result.Parameters['expected']='1'; $result.ExpectedDisplay='Enabled'; return $result }
-            "Store passwords using reversible" { $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='ClearTextPassword'; $result.Parameters['op']='equals'; $result.Parameters['expected']='0'; $result.ExpectedDisplay='Disabled'; return $result }
-            "Account lockout duration"        { $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='LockoutDuration'; $result.Parameters['op']='gte'; if ($val -match '(\d+)') { $result.Parameters['expected']=$Matches[1] }; $result.ExpectedDisplay=$val; return $result }
-            "Account lockout threshold"       { $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='LockoutBadCount'; $result.Parameters['op']='between'; $result.Parameters['expected']='1..5'; $result.ExpectedDisplay=$val; return $result }
-            "Allow Administrator account lockout" { $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='AllowAdministratorLockout'; $result.Parameters['op']='equals'; $result.Parameters['expected']='1'; $result.ExpectedDisplay='Enabled'; return $result }
-            "Reset account lockout counter"   { $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='ResetLockoutCount'; $result.Parameters['op']='gte'; if ($val -match '(\d+)') { $result.Parameters['expected']=$Matches[1] }; $result.ExpectedDisplay=$val; return $result }
+            '^Enforce password history$'                  { $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='PasswordHistorySize'; $result.Parameters['op']='gte'; if ($val -match '(\d+)') { $result.Parameters['expected']=$Matches[1] }; $result.ExpectedDisplay=$val; return $result }
+            '^Maximum password age$'                      {
+                # Title's "is set to 'N or fewer days, but not 0'" gives us the upper bound directly.
+                $upper = 365
+                if ($val -match '(\d+)') { $upper = [int]$Matches[1] }
+                $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='MaximumPasswordAge'; $result.Parameters['op']='between'; $result.Parameters['expected']="1..$upper"; $result.ExpectedDisplay=$val; return $result
+            }
+            '^Minimum password age$'                      { $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='MinimumPasswordAge'; $result.Parameters['op']='gte'; $result.Parameters['expected']='1'; $result.ExpectedDisplay=$val; return $result }
+            '^Minimum password length$'                   { $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='MinimumPasswordLength'; $result.Parameters['op']='gte'; if ($val -match '(\d+)') { $result.Parameters['expected']=$Matches[1] }; $result.ExpectedDisplay=$val; return $result }
+            '^Password must meet complexity requirements$' { $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='PasswordComplexity'; $result.Parameters['op']='equals'; $result.Parameters['expected']='1'; $result.ExpectedDisplay='Enabled'; return $result }
+            '^Relax minimum password length limits$'      { $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='RelaxMinimumPasswordLengthLimits'; $result.Parameters['op']='equals'; $result.Parameters['expected']='1'; $result.ExpectedDisplay='Enabled'; return $result }
+            '^Store passwords using reversible encryption$' { $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='ClearTextPassword'; $result.Parameters['op']='equals'; $result.Parameters['expected']='0'; $result.ExpectedDisplay='Disabled'; return $result }
+            '^Account lockout duration$'                  { $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='LockoutDuration'; $result.Parameters['op']='gte'; if ($val -match '(\d+)') { $result.Parameters['expected']=$Matches[1] }; $result.ExpectedDisplay=$val; return $result }
+            '^Account lockout threshold$'                 { $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='LockoutBadCount'; $result.Parameters['op']='between'; $result.Parameters['expected']='1..5'; $result.ExpectedDisplay=$val; return $result }
+            '^Allow Administrator account lockout$'       { $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='AllowAdministratorLockout'; $result.Parameters['op']='equals'; $result.Parameters['expected']='1'; $result.ExpectedDisplay='Enabled'; return $result }
+            '^Reset account lockout counter after$'       { $result.Kind='SecurityPolicy'; $result.Parameters['section']='SystemAccess'; $result.Parameters['name']='ResetLockoutCount'; $result.Parameters['op']='gte'; if ($val -match '(\d+)') { $result.Parameters['expected']=$Matches[1] }; $result.ExpectedDisplay=$val; return $result }
         }
     }
 
@@ -217,8 +225,11 @@ function Resolve-Check([string]$id, [string]$title, [string]$headerTail, [string
     }
 
     # 5) Registry — generic: find first HKLM/HKCU path in the Audit section.
-    # CIS audit format: "HKLM\Path\To\Key:ValueName" (sometimes \HKLM\ or HKEY_LOCAL_MACHINE\)
-    $regRx = [regex]"(?i)(HKLM|HKCU|HKEY_LOCAL_MACHINE|HKEY_CURRENT_USER)\\(?<key>[^:\r\n]+?):(?<name>[A-Za-z0-9_]+)"
+    # CIS audit format: "HKLM\Path\To\Key:ValueName" — but Word's PDF->text export
+    # often wraps long names mid-word and inserts a space (e.g. "DisablePasswordCha nge",
+    # "LegalNoticeCap tion"). We allow contiguous identifier chunks separated by
+    # at most one internal space and strip whitespace before storing.
+    $regRx = [regex]"(?im)(HKLM|HKCU|HKEY_LOCAL_MACHINE|HKEY_CURRENT_USER)\\(?<key>[^:\r\n]+?):(?<name>[A-Za-z0-9_]+(?:[ \t]+[A-Za-z0-9_]+){0,2})\s*$"
     $regM = $regRx.Match($audit)
     if ($regM.Success) {
         $hive = $regM.Groups[1].Value.ToUpper()
@@ -232,40 +243,52 @@ function Resolve-Check([string]$id, [string]$title, [string]$headerTail, [string
         $result.Parameters['name'] = $valueName
         $result.Kind = 'Registry'
 
-        # Try to discover expected value type/value
+        # Discover expected value type + value
         $expFromTitle = [regex]::Match($headerTail, "(?:is set to|is configured to)\s+['‘]([^'’]+)['’]")
         if ($expFromTitle.Success) { $result.ExpectedDisplay = $expFromTitle.Groups[1].Value }
-        # DWORD pattern
+
         $regValRx = [regex]"REG_(?<t>DWORD|QWORD|SZ|MULTI_SZ|EXPAND_SZ)\s+value\s+of\s+(?<v>[^\.\r\n,]+)"
         $rv = $regValRx.Match($audit)
-        if ($rv.Success) {
-            $rawV = $rv.Groups['v'].Value.Trim().Trim("'""")
-            # Numeric DWORD
-            if ($rv.Groups['t'].Value -in 'DWORD','QWORD') {
-                $clean = $rawV -replace '[^\dxXa-fA-F]',''
-                if ($clean.StartsWith('0x')) {
-                    try { $intVal = [Convert]::ToInt64($clean, 16); $result.Parameters['op']='equals'; $result.Parameters['expected']="$intVal" }
-                    catch { $result.Kind='Manual' }
-                } elseif ($clean -match '^\d+$') {
-                    $result.Parameters['op']='equals'
-                    $result.Parameters['expected']=$clean
-                } else {
-                    # range or "or higher" / "or less" wording
-                    if ($audit -match "value of\s+(\d+)\s*or\s*(higher|greater|more)") { $result.Parameters['op']='gte'; $result.Parameters['expected']=$Matches[1] }
-                    elseif ($audit -match "value of\s+(\d+)\s*or\s*less") { $result.Parameters['op']='lte'; $result.Parameters['expected']=$Matches[1] }
-                    else { $result.Kind='Manual' }
-                }
-            } else {
-                # String values
-                $result.Parameters['op']='equals'
-                $result.Parameters['expected']=$rawV
-            }
-        } else {
-            # Couldn't determine expected — leave as Manual for safety.
+        if (-not $rv.Success) {
+            # Couldn't determine expected — flag as Manual.
             $result.Kind = 'Manual'
+            return $result
         }
 
-        # MSS legacy fixes: stale "Samping" wrap noise — fall back to title hint
+        $rawV    = $rv.Groups['v'].Value.Trim().Trim("'""")
+        $regType = $rv.Groups['t'].Value
+
+        # "or less" / "or more" wording overrides the type. The benchmark
+        # sometimes encodes numeric thresholds as REG_SZ in older sections.
+        if ($audit -match "value of\s+(\d+)\s*or\s*(?:higher|greater|more)") {
+            $result.Parameters['op']='gte'; $result.Parameters['expected']=$Matches[1]
+        }
+        elseif ($audit -match "value of\s+(\d+)\s*or\s*(?:less|fewer)") {
+            $result.Parameters['op']='lte'; $result.Parameters['expected']=$Matches[1]
+        }
+        elseif ($rawV -match '^0x[0-9A-Fa-f]+$') {
+            try { $iv = [Convert]::ToInt64($rawV, 16); $result.Parameters['op']='equals'; $result.Parameters['expected']="$iv" }
+            catch { $result.Kind='Manual' }
+        }
+        elseif ($rawV -match '^\d+$') {
+            $result.Parameters['op']='equals'; $result.Parameters['expected']=$rawV
+        }
+        elseif ($regType -in 'SZ','EXPAND_SZ' -and $rawV -ieq 'text') {
+            # CIS placeholder — means "any non-empty string". Examples: 2.3.7.4
+            # (legal notice text), 2.3.7.5 (legal notice title), banners, etc.
+            $result.Parameters['op']='notEmpty'
+            $result.Parameters['expected']='(any non-empty string)'
+            if (-not $result.ExpectedDisplay) { $result.ExpectedDisplay = '(any non-empty string)' }
+        }
+        elseif ($regType -eq 'MULTI_SZ') {
+            # Expected list, often empty — keep verbatim; runtime can compare.
+            $result.Parameters['op']='equals'; $result.Parameters['expected']=$rawV
+        }
+        else {
+            # String literal value (e.g. "Lock Workstation").
+            $result.Parameters['op']='equals'; $result.Parameters['expected']=$rawV
+        }
+
         if (-not $result.Parameters.ContainsKey('expected')) { $result.Kind = 'Manual' }
         if ($result.Kind -eq 'Registry') { return $result }
     }

@@ -118,6 +118,8 @@ public sealed class RegistryCheckExecutor : ICheckExecutor
         {
             case "exists":
                 return (true, actualStr, null);
+            case "notempty":
+                return (actualStr.Length > 0, actualStr, null);
             case "equals":
                 return (NumOrStringEquals(raw, expected), actualStr, null);
             case "notequals":

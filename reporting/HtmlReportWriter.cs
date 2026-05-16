@@ -128,7 +128,10 @@ public static class HtmlReportWriter
         </html>
         """);
 
-        File.WriteAllText(outputPath, sb.ToString(), new UTF8Encoding(false));
+        // Write with a BOM. The <meta charset> alone is supposed to be enough,
+        // but some viewers (file:// in Edge in particular) fall back to Win-1252
+        // for BOM-less local files, which mangles em-dash and other multibyte chars.
+        File.WriteAllText(outputPath, sb.ToString(), new UTF8Encoding(true));
     }
 
     private static void WriteHeader(StringBuilder sb, AuditReport report, IEnumerable<string> profileFilter)

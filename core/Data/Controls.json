@@ -40,7 +40,7 @@
         "DefaultValue":  "42 days.",
         "Kind":  "SecurityPolicy",
         "Parameters":  {
-                           "expected":  "1..60",
+                           "expected":  "1..365",
                            "section":  "SystemAccess",
                            "op":  "between",
                            "name":  "MaximumPasswordAge"
@@ -112,9 +112,10 @@
         "DefaultValue":  "Disabled. (The Minimum password length may be configured to a maximum of 14 characters.)",
         "Kind":  "SecurityPolicy",
         "Parameters":  {
+                           "expected":  "1",
                            "section":  "SystemAccess",
-                           "op":  "gte",
-                           "name":  "MinimumPasswordLength"
+                           "op":  "equals",
+                           "name":  "RelaxMinimumPasswordLengthLimits"
                        },
         "ExpectedDisplay":  "Enabled"
     },
@@ -1303,7 +1304,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SYSTEM\\CurrentControlSet\\Services\\Netlogon\\Parameters",
-                           "name":  "DisablePasswordCha",
+                           "name":  "DisablePasswordChange",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -1375,7 +1376,7 @@
         "DefaultValue":  "On Windows 7 or older: Disabled. \r\nOn Windows 8.0 or newer: Enabled.",
         "Kind":  "Registry",
         "Parameters":  {
-                           "expected":  "0",
+                           "expected":  "`0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
                            "name":  "DisableCAD",
@@ -1403,7 +1404,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
-                           "name":  "DontDisplayLas",
+                           "name":  "DontDisplayLastUserName",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -1428,7 +1429,7 @@
                            "expected":  "900",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
-                           "name":  "InactivityTime",
+                           "name":  "InactivityTimeoutSecs",
                            "op":  "lte"
                        },
         "ExpectedDisplay":  "900 or fewer second(s), but not 0"
@@ -1450,13 +1451,13 @@
         "DefaultValue":  "No message.",
         "Kind":  "Registry",
         "Parameters":  {
-                           "expected":  "text",
+                           "expected":  "(any non-empty string)",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
-                           "name":  "LegalNoticeTex",
-                           "op":  "equals"
+                           "name":  "LegalNoticeText",
+                           "op":  "notEmpty"
                        },
-        "ExpectedDisplay":  null
+        "ExpectedDisplay":  "(any non-empty string)"
     },
     {
         "Id":  "2.3.7.5",
@@ -1475,13 +1476,13 @@
         "DefaultValue":  "No message.",
         "Kind":  "Registry",
         "Parameters":  {
-                           "expected":  "text",
+                           "expected":  "(any non-empty string)",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
-                           "name":  "LegalNoticeCap",
-                           "op":  "equals"
+                           "name":  "LegalNoticeCaption",
+                           "op":  "notEmpty"
                        },
-        "ExpectedDisplay":  null
+        "ExpectedDisplay":  "(any non-empty string)"
     },
     {
         "Id":  "2.3.7.6",
@@ -1500,11 +1501,11 @@
         "DefaultValue":  "10 logons.",
         "Kind":  "Registry",
         "Parameters":  {
-                           "expected":  "4 or less",
+                           "expected":  "4",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\WindowsNT\\CurrentVersion\\Winlogon",
                            "name":  "CachedLogonsCount",
-                           "op":  "equals"
+                           "op":  "lte"
                        },
         "ExpectedDisplay":  "4 or fewer logon(s)"
     },
@@ -1574,7 +1575,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SYSTEM\\CurrentControlSet\\Services\\LanmanWorkstation\\Parameters",
-                           "name":  "RequireSe",
+                           "name":  "RequireSecuritySignature",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -1599,7 +1600,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SYSTEM\\CurrentControlSet\\Services\\LanmanWorkstation\\Parameters",
-                           "name":  "EnablePla",
+                           "name":  "EnablePlainTextPassword",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -1649,7 +1650,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SYSTEM\\CurrentControlSet\\Services\\LanManServer\\Parameters",
-                           "name":  "RequireSecurit",
+                           "name":  "RequireSecuritySignature",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -1674,7 +1675,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SYSTEM\\CurrentControlSet\\Services\\LanManServer\\Parameters",
-                           "name":  "enableforcedlo",
+                           "name":  "enableforcedlogoff",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -1696,10 +1697,10 @@
         "DefaultValue":  "Off. (The SPN is not required or validated by the SMB server from a SMB client.) References: \r\n1. https://learn.microsoft.com/en-us/windows/security/threat-protection/securitypolicy-settings/microsoft-network-server-server-spn-target-name-validation-level \r\n2. GRID: MS-00000088 CIS Controls: \r\nControls Version \rControl \rIG 1 \rIG 2 \rIG 3 \rv8 \r4.1 Establish and Maintain a Secure Configuration Process \r\n Establish and maintain a secure configuration process for enterprise assets (end-user devices, including portable and mobile, non-computing/IoT devices, and servers) and software (operating systems and applications). Review and update documentation annually, or when significant enterprise changes occur that could impact this Safeguard. \r? \r? \r? \rv7 \r5.1 Establish Secure Configurations \r\n Maintain documented, standard security configuration standards for all authorized operating systems and software. \r? \r? \r? \r \r\n2.3.10 Network access \r\nThis section contains recommendations related to network access.",
         "Kind":  "Registry",
         "Parameters":  {
-                           "expected":  "12",
+                           "expected":  "1 or 2",
                            "hive":  "HKLM",
                            "key":  "SYSTEM\\CurrentControlSet\\Services\\LanManServer\\Parameters",
-                           "name":  "SMBServerNameH",
+                           "name":  "SMBServerNameHardeningLevel",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Accept if provided by client"
@@ -1844,7 +1845,7 @@
         "Parameters":  {
                            "hive":  "HKLM",
                            "key":  "SYSTEM\\CurrentControlSet\\Services\\LanManServer\\Parameters",
-                           "name":  "NullSessionPip"
+                           "name":  "NullSessionPipes"
                        },
         "ExpectedDisplay":  "None"
     },
@@ -1888,11 +1889,13 @@
         "AuditText":  "Navigate to the UI Path articulated in the Remediation section and confirm it is set as prescribed. This group policy setting is backed by the following registry location with a \r\nREG_DWORD value of System\\CurrentControlSet\\Control\\Print\\Printers, \r\nSystem\\CurrentControlSet\\Services\\Eventlog, Software\\Microsoft\\OLAP \r\nServer, Software\\Microsoft\\Windows NT\\CurrentVersion\\Print, \r\nSoftware\\Microsoft\\Windows NT\\CurrentVersion\\Windows, \r\nSystem\\CurrentControlSet\\Control\\ContentIndex, \r\nSystem\\CurrentControlSet\\Control\\Terminal Server, \r\nSystem\\CurrentControlSet\\Control\\Terminal Server\\UserConfig, \r\nSystem\\CurrentControlSet\\Control\\Terminal \r\nServer\\DefaultUserConfiguration, Software\\Microsoft\\Windows \r\nNT\\CurrentVersion\\Perflib and \r\nSystem\\CurrentControlSet\\Services\\SysmonLog. \r\nHKLM\\SYSTEM\\CurrentControlSet\\Control\\SecurePipeServers\\Winreg\\AllowedPaths:M achine",
         "Remediation":  "To establish the recommended configuration via GP, set the following UI path to: \r\nSystem\\CurrentControlSet\\Control\\Print\\Printers \r\nSystem\\CurrentControlSet\\Services\\Eventlog SOFTWARE\\Microsoft\\OLAP \r\nServer SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Print \r\nSOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Windows \r\nSystem\\CurrentControlSet\\Control\\ContentIndex \r\nSystem\\CurrentControlSet\\Control\\Terminal Server \r\nSystem\\CurrentControlSet\\Control\\Terminal Server\\UserConfig \r\nSystem\\CurrentControlSet\\Control\\Terminal \r\nServer\\DefaultUserConfiguration SOFTWARE\\Microsoft\\Windows \r\nNT\\CurrentVersion\\Perflib System\\CurrentControlSet\\Services\\SysmonLog \r\nComputer Configuration\\Policies\\Windows Settings\\Security Settings\\Local Policies\\Security Options\\Network access: Remotely accessible registry paths and sub-paths",
         "DefaultValue":  "System\\CurrentControlSet\\Control\\Print\\Printers \r\nSystem\\CurrentControlSet\\Services\\Eventlog Software\\Microsoft\\OLAP Server \r\nSoftware\\Microsoft\\Windows NT\\CurrentVersion\\Print Software\\Microsoft\\Windows \r\nNT\\CurrentVersion\\Windows System\\CurrentControlSet\\Control\\ContentIndex \r\nSystem\\CurrentControlSet\\Control\\Terminal Server \r\nSystem\\CurrentControlSet\\Control\\Terminal Server\\UserConfig \r\nSystem\\CurrentControlSet\\Control\\Terminal Server\\DefaultUserConfiguration \r\nSoftware\\Microsoft\\Windows NT\\CurrentVersion\\Perflib System\\CurrentControlSet\\Services\\SysmonLog",
-        "Kind":  "Manual",
+        "Kind":  "Registry",
         "Parameters":  {
+                           "expected":  "System\\CurrentControlSet\\Control\\Print\\Printers",
                            "hive":  "HKLM",
                            "key":  "SYSTEM\\CurrentControlSet\\Control\\SecurePipeServers\\Winreg\\AllowedPaths",
-                           "name":  "M"
+                           "name":  "Machine",
+                           "op":  "equals"
                        },
         "ExpectedDisplay":  null
     },
@@ -1916,7 +1919,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SYSTEM\\CurrentControlSet\\Services\\LanManServer\\Parameters",
-                           "name":  "RestrictNullSe",
+                           "name":  "RestrictNullSessAccess",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -1965,7 +1968,7 @@
         "Parameters":  {
                            "hive":  "HKLM",
                            "key":  "SYSTEM\\CurrentControlSet\\Services\\LanManServer\\Parameters",
-                           "name":  "NullSessionSha"
+                           "name":  "NullSessionShares"
                        },
         "ExpectedDisplay":  "None"
     },
@@ -2157,7 +2160,7 @@
         "DefaultValue":  "Enabled: Negotiate encryption (sealing).",
         "Kind":  "Registry",
         "Parameters":  {
-                           "expected":  "12",
+                           "expected":  "1 or 2",
                            "hive":  "HKLM",
                            "key":  "SYSTEM\\CurrentControlSet\\Services\\LDAP",
                            "name":  "LDAPClientConfidentiality",
@@ -2182,7 +2185,7 @@
         "DefaultValue":  "Negotiate signing. (If Transport Layer Security/Secure Sockets Layer (TLS/SSL) has not been started, the LDAP BIND request is initiated with the LDAP data signing option set in addition to the caller-specified options. If TLS/SSL has been started, the LDAP BIND request is initiated with the caller-specified options.)",
         "Kind":  "Registry",
         "Parameters":  {
-                           "expected":  "12",
+                           "expected":  "1 or 2",
                            "hive":  "HKLM",
                            "key":  "SYSTEM\\CurrentControlSet\\Services\\LDAP",
                            "name":  "LDAPClientIntegrity",
@@ -2232,7 +2235,7 @@
         "DefaultValue":  "Allow all. (The client can authenticate to remote servers by using NTLM authentication.)",
         "Kind":  "Registry",
         "Parameters":  {
-                           "expected":  "12",
+                           "expected":  "1 or 2",
                            "hive":  "HKLM",
                            "key":  "SYSTEM\\CurrentControlSet\\Control\\Lsa\\MSV1_0",
                            "name":  "RestrictSendingNTLMTraffic",
@@ -2257,7 +2260,7 @@
         "DefaultValue":  "User input is not required when new keys are stored and used.",
         "Kind":  "Registry",
         "Parameters":  {
-                           "expected":  "12",
+                           "expected":  "1 or 2",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Cryptography",
                            "name":  "ForceKeyProtection",
@@ -2335,7 +2338,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
-                           "name":  "FilterAdminist",
+                           "name":  "FilterAdministratorToken",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -2357,10 +2360,10 @@
         "DefaultValue":  "Prompt for consent for non-Windows binaries. (When an operation for a non-Microsoft application requires elevation of privilege, the user is prompted on the secure desktop to select either Permit or Deny. If the user selects Permit, the operation continues with the user\u0027s highest available privilege.)",
         "Kind":  "Registry",
         "Parameters":  {
-                           "expected":  "12",
+                           "expected":  "1 or 2",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
-                           "name":  "ConsentPromptB",
+                           "name":  "ConsentPromptBehaviorAdmin",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Prompt for consent on the secure desktop"
@@ -2385,7 +2388,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
-                           "name":  "ConsentPromptB",
+                           "name":  "ConsentPromptBehaviorUser",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Automatically deny elevation requests"
@@ -2410,7 +2413,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
-                           "name":  "EnableInstalle",
+                           "name":  "EnableInstallerDetection",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -2435,7 +2438,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
-                           "name":  "EnableSecureUI",
+                           "name":  "EnableSecureUIAPaths",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -2485,7 +2488,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
-                           "name":  "PromptOnSecure",
+                           "name":  "PromptOnSecureDesktop",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -2510,7 +2513,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
-                           "name":  "EnableVirtuali",
+                           "name":  "EnableVirtualization",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -3572,7 +3575,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\DomainProfile",
-                           "name":  "DefaultInbound",
+                           "name":  "DefaultInboundAction",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Block (default)"
@@ -3597,7 +3600,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\DomainProfile",
-                           "name":  "DisableNotific",
+                           "name":  "DisableNotifications",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "No"
@@ -3622,7 +3625,7 @@
                            "expected":  "\u003cpath\u003e\\\u003cfilename\u003e",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\DomainProfile\\Logging",
-                           "name":  "LogFil",
+                           "name":  "LogFilePath",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  null
@@ -3647,7 +3650,7 @@
                            "expected":  "16384",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\DomainProfile\\Logging",
-                           "name":  "LogFil",
+                           "name":  "LogFileSize",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "16,384 KB or greater"
@@ -3672,7 +3675,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\DomainProfile\\Logging",
-                           "name":  "LogDro",
+                           "name":  "LogDroppedPackets",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Yes"
@@ -3697,7 +3700,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\DomainProfile\\Logging",
-                           "name":  "LogSuc",
+                           "name":  "LogSuccessfulConnections",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Yes"
@@ -3722,7 +3725,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PrivateProfile",
-                           "name":  "EnableFirewal",
+                           "name":  "EnableFirewall",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "On (recommended)"
@@ -3747,7 +3750,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PrivateProfile",
-                           "name":  "DefaultInboun",
+                           "name":  "DefaultInboundAction",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Block (default)"
@@ -3772,7 +3775,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PrivateProfile",
-                           "name":  "DisableNotifi",
+                           "name":  "DisableNotifications",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "No"
@@ -3797,7 +3800,7 @@
                            "expected":  "\u003cpath\u003e\\\u003cfilename\u003e",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PrivateProfile\\Logging",
-                           "name":  "LogFi",
+                           "name":  "LogFilePath",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  null
@@ -3822,7 +3825,7 @@
                            "expected":  "16384",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PrivateProfile\\Logging",
-                           "name":  "LogFi",
+                           "name":  "LogFileSize",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "16,384 KB or greater"
@@ -3847,7 +3850,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PrivateProfile\\Logging",
-                           "name":  "LogDr",
+                           "name":  "LogDroppedPackets",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Yes"
@@ -3872,7 +3875,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PrivateProfile\\Logging",
-                           "name":  "LogSu",
+                           "name":  "LogSuccessfulConnections",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Yes"
@@ -3922,7 +3925,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile",
-                           "name":  "DefaultInbound",
+                           "name":  "DefaultInboundAction",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Block (default)"
@@ -3947,7 +3950,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile",
-                           "name":  "DisableNotific",
+                           "name":  "DisableNotifications",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "No"
@@ -3972,7 +3975,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile",
-                           "name":  "AllowLocalPoli",
+                           "name":  "AllowLocalPolicyMerge",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "No"
@@ -3997,7 +4000,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile",
-                           "name":  "AllowLocalIPse",
+                           "name":  "AllowLocalIPsecPolicyMerge",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "No"
@@ -4022,7 +4025,7 @@
                            "expected":  "\u003cpath\u003e\\\u003cfilename\u003e",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile\\Logging",
-                           "name":  "LogFil",
+                           "name":  "LogFilePath",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  null
@@ -4047,7 +4050,7 @@
                            "expected":  "16384",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile\\Logging",
-                           "name":  "LogFil",
+                           "name":  "LogFileSize",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "16,384 KB or greater"
@@ -4072,7 +4075,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile\\Logging",
-                           "name":  "LogDro",
+                           "name":  "LogDroppedPackets",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Yes"
@@ -4097,7 +4100,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile\\Logging",
-                           "name":  "LogSuc",
+                           "name":  "LogSuccessfulConnections",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Yes"
@@ -4719,7 +4722,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\Personalization",
-                           "name":  "NoLockScreenSlidesho",
+                           "name":  "NoLockScreenSlideshow",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -4744,7 +4747,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\InputPersonalization",
-                           "name":  "AllowInputPersonalizati",
+                           "name":  "AllowInputPersonalization",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -4769,7 +4772,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
-                           "name":  "AllowOnlineT",
+                           "name":  "AllowOnlineTips",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -4794,7 +4797,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
-                           "name":  "LocalAccountTo",
+                           "name":  "LocalAccountTokenFilterPolicy",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -4940,7 +4943,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest",
-                           "name":  "UseLogonCrede",
+                           "name":  "UseLogonCredential",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -4990,7 +4993,7 @@
                            "expected":  "2",
                            "hive":  "HKLM",
                            "key":  "SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters",
-                           "name":  "DisableIPSourceRouti",
+                           "name":  "DisableIPSourceRouting",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled: Highest protection, source routing is completely disabled"
@@ -5015,7 +5018,7 @@
                            "expected":  "2",
                            "hive":  "HKLM",
                            "key":  "SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters",
-                           "name":  "DisableIPSourceRoutin",
+                           "name":  "DisableIPSourceRouting",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled: Highest protection, source routing is completely disabled"
@@ -5140,7 +5143,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters",
-                           "name":  "PerformRouterDiscover",
+                           "name":  "PerformRouterDiscovery",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -5190,7 +5193,7 @@
                            "expected":  "3",
                            "hive":  "HKLM",
                            "key":  "SYSTEM\\CurrentControlSet\\Services\\TCPIP6\\Parameters",
-                           "name":  "TcpMaxDataRetransmis",
+                           "name":  "TcpMaxDataRetransmissions",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled: 3"
@@ -5215,7 +5218,7 @@
                            "expected":  "3",
                            "hive":  "HKLM",
                            "key":  "SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters",
-                           "name":  "TcpMaxDataRetransmiss",
+                           "name":  "TcpMaxDataRetransmissions",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled: 3"
@@ -5287,7 +5290,7 @@
         "DefaultValue":  "Enabled. (The DNS client will disable NetBIOS name resolution on public networks.)",
         "Kind":  "Registry",
         "Parameters":  {
-                           "expected":  "02",
+                           "expected":  "0 or 2",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsNT\\DNSClient",
                            "name":  "EnableNetbios",
@@ -5386,7 +5389,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\LanmanServer",
-                           "name":  "AuditClientDoesNotSuppo",
+                           "name":  "AuditClientDoesNotSupportEncryption",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -5411,7 +5414,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\LanmanServer",
-                           "name":  "AuditClientDoesNotSuppo",
+                           "name":  "AuditClientDoesNotSupportSigning",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -5536,7 +5539,7 @@
                            "expected":  "2000",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\LanmanServer",
-                           "name":  "InvalidAuthenticationDe",
+                           "name":  "InvalidAuthenticationDelayTimeInMs",
                            "op":  "gte"
                        },
         "ExpectedDisplay":  "Enabled: 2000"
@@ -5561,7 +5564,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\LanmanWorkstation",
-                           "name":  "AuditInsecureGuest",
+                           "name":  "AuditInsecureGuestLogon",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -5586,7 +5589,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\LanmanWorkstation",
-                           "name":  "AuditServerDoesNot",
+                           "name":  "AuditServerDoesNotSupportEncryption",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -5611,7 +5614,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\LanmanWorkstation",
-                           "name":  "AuditServerDoesNot",
+                           "name":  "AuditServerDoesNotSupportSigning",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -5636,7 +5639,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\LanmanWorkstation",
-                           "name":  "AllowInsecureGuest",
+                           "name":  "AllowInsecureGuestAuth",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -5950,7 +5953,7 @@
                            "expected":  "3",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\WcmSvc\\GroupPolicy",
-                           "name":  "fMinimizeConnecti",
+                           "name":  "fMinimizeConnections",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled: 3 = Prevent Wi-Fi when on Ethernet"
@@ -6000,7 +6003,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\WcmSvc\\wifinetworkmanager\\config",
-                           "name":  "AutoConnectAllowedOE",
+                           "name":  "AutoConnectAllowedOEM",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -6143,7 +6146,7 @@
         "DefaultValue":  "Enabled. (RPC over TCP is enabled and Negotiate is used for the authentication protocol.) \r\nGRID: MS-00000286",
         "Kind":  "Registry",
         "Parameters":  {
-                           "expected":  "01",
+                           "expected":  "0 or 1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsNT\\Printers\\RPC",
                            "name":  "ForceKerberosForRpc",
@@ -6455,7 +6458,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\CurrentVersion\\PushNotifications",
-                           "name":  "NoC",
+                           "name":  "NoCloudApplicationNotification",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -6480,7 +6483,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\Explorer",
-                           "name":  "HideRecommendedPersonalized",
+                           "name":  "HideRecommendedPersonalizedSites",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -6505,7 +6508,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\Audit",
-                           "name":  "ProcessC",
+                           "name":  "ProcessCreationIncludeCmdLine_Enabled",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -6555,7 +6558,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\CredentialsDelegation",
-                           "name":  "AllowProtected",
+                           "name":  "AllowProtectedCreds",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -6580,7 +6583,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard",
-                           "name":  "EnableVirtualizationBase",
+                           "name":  "EnableVirtualizationBasedSecurity",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -6602,10 +6605,10 @@
         "DefaultValue":  "Disabled.",
         "Kind":  "Registry",
         "Parameters":  {
-                           "expected":  "13",
+                           "expected":  "1 or 3",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard",
-                           "name":  "RequirePlatformSecurityF",
+                           "name":  "RequirePlatformSecurityFeatures",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Secure Boot"
@@ -6630,7 +6633,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard",
-                           "name":  "HypervisorEnforcedCodeIn",
+                           "name":  "HypervisorEnforcedCodeIntegrity",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled with UEFI lock"
@@ -6705,7 +6708,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard",
-                           "name":  "ConfigureSystemGuardLaun",
+                           "name":  "ConfigureSystemGuardLaunch",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -6730,7 +6733,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard",
-                           "name":  "ConfigureKernelShadowSta",
+                           "name":  "ConfigureKernelShadowStacksLaunch",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled: Enabled in enforcement mode"
@@ -6757,7 +6760,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceInstall\\Restrictions",
-                           "name":  "DenyDevic",
+                           "name":  "DenyDeviceClasses",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -6923,7 +6926,7 @@
         "Parameters":  {
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
-                           "name":  "DisableBkGndGr"
+                           "name":  "DisableBkGndGroupPolicy"
                        },
         "ExpectedDisplay":  "Disabled"
     },
@@ -6997,7 +7000,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\TabletPC",
-                           "name":  "PreventHandwritingDataShari",
+                           "name":  "PreventHandwritingDataSharing",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -7022,7 +7025,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\HandwritingErrorReports",
-                           "name":  "PreventHandw",
+                           "name":  "PreventHandwritingErrorReports",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -7072,7 +7075,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
-                           "name":  "NoWebService",
+                           "name":  "NoWebServices",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -7255,11 +7258,13 @@
         "AuditText":  "Navigate to the UI Path articulated in the Remediation section and confirm it is set as prescribed. This group policy setting is backed by the following registry locations with a REG_DWORD value of 1 (Disabled) and 0 (DoReport). \r\nHKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Error Reporting:Disabled HKLM\\SOFTWARE\\Policies\\Microsoft\\PCHealth\\ErrorReporting:DoReport",
         "Remediation":  "To establish the recommended configuration via GP, set the following UI path to Enabled: \r\nComputer Configuration\\Policies\\Administrative Templates\\System\\Internet \r\nCommunication Management\\Internet Communication settings\\Turn off Windows Error Reporting \r\nNote: This Group Policy path is provided by the Group Policy template ICM.admx/adml that is included with all versions of the Microsoft Windows Administrative Templates.",
         "DefaultValue":  "Disabled. (Errors may be reported to Microsoft via the Internet or to a corporate file share.)",
-        "Kind":  "Manual",
+        "Kind":  "Registry",
         "Parameters":  {
+                           "expected":  "1 (Disabled) and 0 (DoReport)",
                            "hive":  "HKLM",
-                           "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsErrorReporting",
-                           "name":  "Disabled"
+                           "key":  "SOFTWARE\\Policies\\Microsoft\\PCHealth\\ErrorReporting",
+                           "name":  "DoReport",
+                           "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
     },
@@ -7278,11 +7283,13 @@
         "AuditText":  "Navigate to the UI Path articulated in the Remediation section and confirm it is set as prescribed. This group policy setting is backed by the following registry location with a REG_DWORD value of 0 (DevicePKInitBehavior) and 1 (DevicePKInitEnabled). \r\nHKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\kerberos\\param eters:DevicePKInitBehavior \r\nHKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\kerberos\\param eters:DevicePKInitEnabled",
         "Remediation":  "To establish the recommended configuration via GP, set the following UI path to Enabled: Automatic: \r\nComputer Configuration\\Policies\\Administrative \r\nTemplates\\System\\Kerberos\\Support device authentication using certificate \r\nNote: This Group Policy path is provided by the Group Policy template \r\nKerberos.admx/adml that is included with the Microsoft Windows 10 RTM (Release 1507) Administrative Templates (or newer).",
         "DefaultValue":  "Automatic. (Devices will attempt to authenticate using their certificate. If the DC does not support computer account authentication using certificates then authentication with password will be attempted.) References: \r\n   1. GRID: MS-00000332 CIS Controls: \r\nControls Version \rControl \rIG 1 \rIG 2 \rIG 3 \rv8 \r0.0 Explicitly Not Mapped \r\n Explicitly Not Mapped \r \r \r \rv7 \r1.6 Address Unauthorized Assets \r\n Ensure that unauthorized assets are either removed from the network, quarantined or the inventory is updated in a timely manner. \r? \r? \r? \rv7 \r1.8 Utilize Client Certificates to Authenticate Hardware Assets \r\n Use client certificates to authenticate hardware assets connecting to the organization\u0027s trusted network. \r \r \r? \r \r\n18.9.24 Kernel DMA Protection \r\nThis section contains recommendations related to Kernel DMA Protection. \r\nThis Group Policy section is provided by the Group Policy template \r\nDmaGuard.admx/adml that is included with the Microsoft Windows 10 Release 1809 and Server 2019 Administrative Templates (or newer).",
-        "Kind":  "Manual",
+        "Kind":  "Registry",
         "Parameters":  {
+                           "expected":  "0 (DevicePKInitBehavior) and 1 (DevicePKInitEnabled)",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\kerberos\\parameters",
-                           "name":  "DevicePKInitBehavior"
+                           "name":  "DevicePKInitBehavior",
+                           "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled: Automatic"
     },
@@ -7467,7 +7474,7 @@
                            "expected":  "8",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\LAPS",
-                           "name":  "PostAuthenticati",
+                           "name":  "PostAuthenticationResetDelay",
                            "op":  "lte"
                        },
         "ExpectedDisplay":  "Enabled: 8 or fewer hours, but not 0"
@@ -7492,7 +7499,7 @@
                            "expected":  "3",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\LAPS",
-                           "name":  "PostAuthenticati",
+                           "name":  "PostAuthenticationActions",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled: Reset the password and logoff the managed account"
@@ -7588,7 +7595,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
-                           "name":  "BlockUserFromShowingAccountDe",
+                           "name":  "BlockUserFromShowingAccountDetailsOnSignin",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -7688,7 +7695,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
-                           "name":  "DisableLockScreenAppNotificat",
+                           "name":  "DisableLockScreenAppNotifications",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -8088,7 +8095,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\SAM",
-                           "name":  "SamrChange",
+                           "name":  "SamrChangeUserPasswordApiPolicy",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled: Block all change password RPC methods"
@@ -8113,7 +8120,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\ScriptedDiagnosticsProvider\\Policy",
-                           "name":  "D",
+                           "name":  "DisableQueryRemoteServer",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -8163,7 +8170,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\AdvertisingInfo",
-                           "name":  "DisabledByGroupPolic",
+                           "name":  "DisabledByGroupPolicy",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -8263,7 +8270,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\AppCompat",
-                           "name":  "DisableApplicationFootprin",
+                           "name":  "DisableApplicationFootprint",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -8338,7 +8345,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\Appx",
-                           "name":  "DisablePerUserUnsignedPackagesB",
+                           "name":  "DisablePerUserUnsignedPackagesByDefault",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -8388,7 +8395,7 @@
                            "expected":  "2",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy",
-                           "name":  "LetAppsActivateWithVoiceA",
+                           "name":  "LetAppsActivateWithVoiceAboveLock",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled: Force Deny"
@@ -8438,7 +8445,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
-                           "name":  "BlockHostedApp",
+                           "name":  "BlockHostedAppAccessWinRT",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -8513,7 +8520,7 @@
                            "expected":  "255",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
-                           "name":  "NoDriveTypeA",
+                           "name":  "NoDriveTypeAutoRun",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled: All drives"
@@ -8538,7 +8545,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Biometrics\\FacialFeatures",
-                           "name":  "EnhancedAntiSpoofi",
+                           "name":  "EnhancedAntiSpoofing",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -9378,7 +9385,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent",
-                           "name":  "DisableConsumerAccountS",
+                           "name":  "DisableConsumerAccountStateContent",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -9403,7 +9410,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent",
-                           "name":  "DisableCloudOptimizedCo",
+                           "name":  "DisableCloudOptimizedContent",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -9428,7 +9435,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent",
-                           "name":  "DisableWindowsConsumerF",
+                           "name":  "DisableWindowsConsumerFeatures",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -9450,7 +9457,7 @@
         "DefaultValue":  "Disabled. (A PIN is not required for pairing to a wireless display device.)",
         "Kind":  "Registry",
         "Parameters":  {
-                           "expected":  "12",
+                           "expected":  "1 or 2",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\Connect",
                            "name":  "RequirePinForPairing",
@@ -9503,7 +9510,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\CredUI",
-                           "name":  "EnumerateAdmin",
+                           "name":  "EnumerateAdministrators",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -9550,7 +9557,7 @@
         "DefaultValue":  "Disabled. (The device will send required diagnostic data and the end user can choose whether to send optional diagnostic data from the Settings app.)",
         "Kind":  "Registry",
         "Parameters":  {
-                           "expected":  "01",
+                           "expected":  "0 or 1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
                            "name":  "AllowTelemetry",
@@ -9578,7 +9585,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
-                           "name":  "DisableEnterpriseAuth",
+                           "name":  "DisableEnterpriseAuthProxy",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled: Disable Authenticated Proxy usage"
@@ -9603,7 +9610,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
-                           "name":  "DoNotShowFeedbackNoti",
+                           "name":  "DoNotShowFeedbackNotifications",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -9628,7 +9635,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
-                           "name":  "EnableOneSettingsAudi",
+                           "name":  "EnableOneSettingsAuditing",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -9653,7 +9660,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
-                           "name":  "LimitDiagnosticLogCol",
+                           "name":  "LimitDiagnosticLogCollection",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -9698,11 +9705,13 @@
         "AuditText":  "Navigate to the UI Path articulated in the Remediation section and confirm it is set as prescribed. This group policy setting is backed by the following registry location with a REG_DWORD value of anything other than 3. \r\nHKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization:DODownloadMode",
         "Remediation":  "To establish the recommended configuration via GP, set the following UI path to any value other than Enabled: Internet (3): \r\nComputer Configuration\\Policies\\Administrative Templates\\Windows Components\\Delivery Optimization\\Download Mode \r\nNote: This Group Policy path is provided by the Group Policy template \r\nDeliveryOptimization.admx/adml that is included with the Microsoft Windows 10 RTM (Release 1507) Administrative Templates (or newer).",
         "DefaultValue":  "Enterprise, Enterprise LTSB and Education SKUs: Enabled: LAN (1) \r\nAll other SKUs: Enabled: Internet (3)",
-        "Kind":  "Manual",
+        "Kind":  "Registry",
         "Parameters":  {
+                           "expected":  "anything other than 3",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization",
-                           "name":  "DODownloadMode"
+                           "name":  "DODownloadMode",
+                           "op":  "equals"
                        },
         "ExpectedDisplay":  null
     },
@@ -9751,7 +9760,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\AppInstaller",
-                           "name":  "EnableExperimentalFeatu",
+                           "name":  "EnableExperimentalFeatures",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -9801,7 +9810,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\AppInstaller",
-                           "name":  "EnableLocalArchiveMalwa",
+                           "name":  "EnableLocalArchiveMalwareScanOverride",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -9826,7 +9835,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\AppInstaller",
-                           "name":  "EnableBypassCertificate",
+                           "name":  "EnableBypassCertificatePinningForMicrosoftStore",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -9851,7 +9860,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\AppInstaller",
-                           "name":  "EnableMSAppInstallerPro",
+                           "name":  "EnableMSAppInstallerProtocol",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -9876,7 +9885,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\AppInstaller",
-                           "name":  "EnableWindowsPackageMan",
+                           "name":  "EnableWindowsPackageManagerCommandLineInterfaces",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -10151,7 +10160,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\Explorer",
-                           "name":  "DisableMotWOnInsecurePathCo",
+                           "name":  "DisableMotWOnInsecurePathCopy",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -10176,7 +10185,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\Explorer",
-                           "name":  "NoHeapTerminationOnCorrupti",
+                           "name":  "NoHeapTerminationOnCorruption",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -10201,7 +10210,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
-                           "name":  "PreXPSP2Shel",
+                           "name":  "PreXPSP2ShellProtocolBehavior",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -10392,13 +10401,9 @@
         "AuditText":  "Navigate to the UI Path articulated in the Remediation section and confirm it is set as prescribed. This group policy setting is backed by the following registry location with a REG_SZ value of 1 for each rule. \r\nHKLM\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules:26190899-1602-49e8-8b27-eb1d0a1ce869 \r\nHKLM\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules:3b576869-a4ec-4529-8536-b80a7769e899 \r\nHKLM\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules:56a863a9-875e-4185-98a7-b882c64b5ce5 \r\nHKLM\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit \r\nGuard\\ASR\\Rules:5beb7efe-fd9a-4556-801d-275e5ffc04cc \r\nHKLM\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit \r\nGuard\\ASR\\Rules:75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84 \r\nHKLM\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules:7674ba52-37eb-4a4f-a9a1-f0f9a1619a2c \r\nHKLM\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules:92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b \r\nHKLM\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules:9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2 \r\nHKLM\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit \r\nGuard\\ASR\\Rules:b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4 \r\nHKLM\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit \r\nGuard\\ASR\\Rules:be9ba2d9-53ea-4cdc-84e5-9b1eeee46550 \r\nHKLM\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules:d3e037e1-3eb8-44c8-a917-57927947596d \r\nHKLM\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules:d4f940ab-401b-4efc-aadc-ad5f3c50688a \r\nHKLM\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit \r\nGuard\\ASR\\Rules:e6db77e5-3df2-4cf1-b95a-636979351e5b",
         "Remediation":  "To establish the recommended configuration via GP, set the following UI path so that 26190899-1602-49e8-8b27-eb1d0a1ce869, 3b576869-a4ec-4529-8536b80a7769e899, 56a863a9-875e-4185-98a7-b882c64b5ce5, 5beb7efe-fd9a-4556801d-275e5ffc04cc, 75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84, 7674ba52-37eb-\r\n4a4f-a9a1-f0f9a1619a2c, 92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b, 9e6c4e1f7d60-472f-ba1a-a39ef669e4b2, b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4, be9ba2d9-53ea-4cdc-84e5-9b1eeee46550, d3e037e1-3eb8-44c8-a91757927947596d, d4f940ab-401b-4efc-aadc-ad5f3c50688a, and e6db77e5-3df24cf1-b95a-636979351e5b are each set to a value of 1: \r\nComputer Configuration\\Policies\\Administrative Templates\\Windows \r\nComponents\\Microsoft Defender Antivirus\\Microsoft Defender Exploit \r\nGuard\\Attack Surface Reduction\\Configure Attack Surface Reduction rules: Set the state for each ASR rule \r\nNote: This Group Policy path is provided by the Group Policy template \r\nWindowsDefender.admx/adml that is included with the Microsoft Windows 10 Release 1709 Administrative Templates (or newer).",
         "DefaultValue":  "Disabled. (No ASR rules will be configured.)",
-        "Kind":  "Registry",
+        "Kind":  "Manual",
         "Parameters":  {
-                           "expected":  "1 for each rule",
-                           "hive":  "HKLM",
-                           "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsDefender\\WindowsDefenderExploitGuard\\ASR\\Rules",
-                           "name":  "26190899",
-                           "op":  "equals"
+
                        },
         "ExpectedDisplay":  null
     },
@@ -11495,11 +11500,13 @@
         "AuditText":  "Navigate to the UI Path articulated in the Remediation section and confirm it is set as prescribed. This group policy setting is backed by the following registry location with a REG_DWORD value of 0 or that the key does not exist. \r\nHKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search:AllowCloudSearch",
         "Remediation":  "To establish the recommended configuration via GP, set the following UI path to Enabled: Disable Cloud Search: \r\nComputer Configuration\\Policies\\Administrative Templates\\Windows Components\\Search\\Allow Cloud Search \r\nNote: This Group Policy path is provided by the Group Policy template \r\nSearch.admx/adml that is included with the Microsoft Windows 10 Release 1709 Administrative Templates (or newer).",
         "DefaultValue":  "Enabled: Enable Cloud Search. (Allow search and Cortana to search cloud sources like OneDrive and SharePoint.)",
-        "Kind":  "Manual",
+        "Kind":  "Registry",
         "Parameters":  {
+                           "expected":  "0 or that the key does not exist",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsSearch",
-                           "name":  "AllowCloudSearch"
+                           "name":  "AllowCloudSearch",
+                           "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled: Disable Cloud Search"
     },
@@ -11943,11 +11950,13 @@
         "AuditText":  "Navigate to the UI Path articulated in the Remediation section and confirm it is set as prescribed. This group policy setting is backed by the following registry locations with a REG_DWORD value of 1 (EnableSmartScreen) and REG_SZ value of Block (ShellSmartScreenLevel). \r\nHKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\System:EnableSmartScreen \r\nHKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\System:ShellSmartScreenLevel",
         "Remediation":  "To establish the recommended configuration via GP, set the following UI path to Enabled: Warn and prevent bypass: \r\nComputer Configuration\\Policies\\Administrative Templates\\Windows \r\nComponents\\Windows Defender SmartScreen\\Explorer\\Configure Windows Defender SmartScreen \r\nNote: This Group Policy path is provided by the Group Policy template \r\nWindowsExplorer.admx/adml that is included with the Microsoft Windows 8.0 \u0026 Server 2012 (non-R2) Administrative Templates (or newer). \r\nNote #2: In older Microsoft Windows Administrative Templates, this setting was initially named Configure Windows SmartScreen, but it was renamed starting with the Windows 10 Release 1703 Administrative Templates.",
         "DefaultValue":  "Enabled. (Users can change settings.)",
-        "Kind":  "Manual",
+        "Kind":  "Registry",
         "Parameters":  {
+                           "expected":  "1 (EnableSmartScreen) and REG_SZ value of Block (ShellSmartScreenLevel)",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
-                           "name":  "EnableSmartScreen"
+                           "name":  "EnableSmartScreen",
+                           "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled: Warn and prevent bypass"
     },
@@ -11996,7 +12005,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Policies\\PassportForWork\\Biometrics",
-                           "name":  "EnableESSwithSupp",
+                           "name":  "EnableESSwithSupportedPeripherals",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled: 1"
@@ -12021,7 +12030,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsInkWorkspace",
-                           "name":  "AllowSuggestedAppsInWind",
+                           "name":  "AllowSuggestedAppsInWindowsInkWorkspace",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -12043,7 +12052,7 @@
         "DefaultValue":  "Enabled. (Windows Ink Workspace is permitted above the lock screen.)",
         "Kind":  "Registry",
         "Parameters":  {
-                           "expected":  "01",
+                           "expected":  "0 or 1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\WindowsInkWorkspace",
                            "name":  "AllowWindowsInkWorkspace",
@@ -12167,7 +12176,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging",
-                           "name":  "Enable",
+                           "name":  "EnableScriptBlockLogging",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -12192,7 +12201,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\Transcription",
-                           "name":  "EnableTrans",
+                           "name":  "EnableTranscripting",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -12342,7 +12351,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\WinRM\\Service",
-                           "name":  "AllowUnencryptedTraffi",
+                           "name":  "AllowUnencryptedTraffic",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -12392,7 +12401,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\WinRM\\Service\\WinRS",
-                           "name":  "AllowRemoteShell",
+                           "name":  "AllowRemoteShellAccess",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -12517,7 +12526,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU",
-                           "name":  "NoAutoRebootWithLog",
+                           "name":  "NoAutoRebootWithLoggedOnUsers",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -12592,7 +12601,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
-                           "name":  "AllowTemporaryEnterpri",
+                           "name":  "AllowTemporaryEnterpriseFeatureControl",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -12617,7 +12626,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
-                           "name":  "SetDisablePauseUXAcces",
+                           "name":  "SetDisablePauseUXAccess",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled"
@@ -12642,7 +12651,7 @@
                            "expected":  "1",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
-                           "name":  "ManagePreviewBuildsPol",
+                           "name":  "ManagePreviewBuildsPolicyValue",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -12662,11 +12671,13 @@
         "AuditText":  "Navigate to the UI Path articulated in the Remediation section and confirm it is set as prescribed. This group policy setting is backed by the following registry location with a REG_DWORD value of 1 (DeferQualityUpdates) and 0 (DeferQualityUpdatesPeriodInDays). \r\nHKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate:DeferQualityUpdates HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate:DeferQualityUpdatesPer iodInDays",
         "Remediation":  "To establish the recommended configuration via GP, set the following UI path to Enabled:0 days: \r\nComputer Configuration\\Policies\\Administrative Templates\\Windows \r\nComponents\\Windows Update\\Manage updates offered from Windows Update\\Select when Quality Updates are received \r\nNote: Note: This Group Policy path may not exist by default. It is provided by the Group Policy template WindowsUpdate.admx/adml that is included with the Microsoft Windows 10 Release 1607 \u0026 Server 2016 Administrative Templates (or newer).",
         "DefaultValue":  "Enabled: 0 days. (Install new Quality Updates as soon as they are available.)",
-        "Kind":  "Manual",
+        "Kind":  "Registry",
         "Parameters":  {
+                           "expected":  "1 (DeferQualityUpdates) and 0 (DeferQualityUpdatesPeriodInDays)",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
-                           "name":  "DeferQualityUpdates"
+                           "name":  "DeferQualityUpdatesPeriodInDays",
+                           "op":  "equals"
                        },
         "ExpectedDisplay":  "Enabled: 0 days"
     },
@@ -12690,7 +12701,7 @@
                            "expected":  "0",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
-                           "name":  "SetAllowOptionalConten",
+                           "name":  "SetAllowOptionalContent",
                            "op":  "equals"
                        },
         "ExpectedDisplay":  "Disabled"
@@ -12733,7 +12744,7 @@
         "DefaultValue":  "Enabled.",
         "Kind":  "Registry",
         "Parameters":  {
-                           "expected":  "256287",
+                           "expected":  "256 or 287",
                            "hive":  "HKLM",
                            "key":  "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\InternetSettings",
                            "name":  "DisableProxyAuthenticationSchemes",
